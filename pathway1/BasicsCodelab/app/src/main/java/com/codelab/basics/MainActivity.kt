@@ -1,11 +1,17 @@
 package com.codelab.basics
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,7 +33,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun OnBoardingScreen(onContinueCLicked: () -> Unit) {
     //by 키워드를 통해 .value를 기입할 필요가 없다.
-    var shouldShowOnBoarding by remember {
+    var shouldShowOnBoarding by rememberSaveable {
         mutableStateOf(true)
     }
 
@@ -50,8 +56,10 @@ fun OnBoardingScreen(onContinueCLicked: () -> Unit) {
 @Composable
 fun Greeting(name: String) {
     //리컴포지션을 방지하므로 상태가 재설정되지 않는다.
-    val expanded = remember { mutableStateOf(false) }
-    val extraPadding = if (expanded.value) 48.dp else 0.dp
+    var expanded by remember { mutableStateOf(false) }
+    val extraPadding by animateDpAsState(
+        if (expanded) 48.dp else 0.dp
+    )
     //배경 색상 설정
     Surface(
         color = MaterialTheme.colors.primary,
@@ -66,11 +74,16 @@ fun Greeting(name: String) {
                 Text(text = "Hello, ")
                 Text(text = name)
             }
-            OutlinedButton(onClick = {
-                expanded.value = !expanded.value
+            ElevatedButton(onClick = {
+                expanded = !expanded
             }) {
-                Text(if (expanded.value) "Show less" else "Show more")
+                Text(if (expanded) "Show less" else "Show more")
             }
+//            OutlinedButton(onClick = {
+//                expanded.value = !expanded.value
+//            }) {
+//                Text(if (expanded.value) "Show less" else "Show more")
+//            }
         }
     }
 }
@@ -116,6 +129,18 @@ fun TestApp() {
     }
 }
 
+@Composable
+private fun LazyGreetings(
+    modifier: Modifier = Modifier,
+    names: List<String> = List(1000) { "$it" }
+) {
+    LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
+        items(items = names) { name ->
+            Greeting(name = name)
+        }
+    }
+}
+
 //컴포즈 미리보기
 @Preview(showBackground = true, widthDp = 320)
 @Composable
@@ -123,4 +148,16 @@ fun DefaultPreview() {
     BasicsCodelabTheme {
         Greeting("Lee Seung Yong")
     }
+}
+
+@Preview(
+    showBackground = true,
+    widthDp = 320,
+    uiMode = UI_MODE_NIGHT_YES,
+    name = "DARK"
+)
+@Preview()
+@Composable
+fun DarkPreview() {
+
 }
